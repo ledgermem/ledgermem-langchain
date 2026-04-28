@@ -43,14 +43,23 @@ class LedgerMemMemory(BaseMemory):
         query = inputs.get(self.input_key, "")
         if not query:
             return {self.memory_key: ""}
-        response = self._client.search(query, limit=self.top_k)
+        # When a namespace is configured we must filter retrieved hits to
+        # that namespace, otherwise memories from sibling threads/users
+        # leak into the prompt. Over-fetch so the post-filter window still
+        # contains top_k matches.
+        fetch_limit = self.top_k * 4 if self.namespace else self.top_k
+        response = self._client.search(query, limit=fetch_limit)
         hits = getattr(response, "hits", []) or []
-        lines = []
+        lines: list[str] = []
         for hit in hits:
-            content = getattr(hit, "content", None) or getattr(hit, "text", "")
             metadata = getattr(hit, "metadata", {}) or {}
+            if self.namespace and metadata.get("namespace") != self.namespace:
+                continue
+            content = getattr(hit, "content", None) or getattr(hit, "text", "")
             role = metadata.get("role", "memory")
             lines.append(f"{role}: {content}")
+            if len(lines) >= self.top_k:
+                break
         return {self.memory_key: "\n".join(lines)}
 
     def save_context(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> None:
@@ -62,15 +71,26 @@ class LedgerMemMemory(BaseMemory):
             self._client.add(str(ai_text), metadata=self._format_metadata("assistant"))
 
     def clear(self) -> None:
-        # LedgerMem does not expose a workspace-wide wipe in the SDK; iterate and delete.
+        # LedgerMem does not expose a workspace-wide wipe in the SDK; iterate
+        # and delete. Snapshot ids first — deleting while paginating mutates
+        # the underlying collection and either skips rows or loops forever
+        # depending on whether the backend uses offset or keyset cursors.
+        # Honour the configured namespace so clear() doesn't nuke other
+        # threads sharing the same workspace.
+        ids: list[str] = []
         cursor: Optional[str] = None
         while True:
             page = self._client.list(limit=100, cursor=cursor)
             items = getattr(page, "items", []) or getattr(page, "memories", []) or []
             for item in items:
+                meta = getattr(item, "metadata", {}) or {}
+                if self.namespace and meta.get("namespace") != self.namespace:
+                    continue
                 memory_id = getattr(item, "id", None)
                 if memory_id is not None:
-                    self._client.delete(memory_id)
+                    ids.append(memory_id)
             cursor = getattr(page, "next_cursor", None)
             if not cursor:
                 break
+        for memory_id in ids:
+            self._client.delete(memory_id)
