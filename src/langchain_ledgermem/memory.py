@@ -40,7 +40,20 @@ class LedgerMemMemory(BaseMemory):
         return meta
 
     def load_memory_variables(self, inputs: dict[str, Any]) -> dict[str, Any]:
-        query = inputs.get(self.input_key, "")
+        raw_query = inputs.get(self.input_key, "")
+        # LangChain chains routinely pass non-string inputs (dicts for
+        # multi-modal, BaseMessage subclasses, lists). Coerce defensively
+        # — passing a dict straight to ``client.search`` raised
+        # ``TypeError: query must be str`` deep inside the SDK only at
+        # runtime, with no clue which chain step caused it.
+        if isinstance(raw_query, str):
+            query = raw_query
+        elif raw_query is None:
+            query = ""
+        else:
+            content = getattr(raw_query, "content", None)
+            query = content if isinstance(content, str) else str(raw_query)
+        query = query.strip()
         if not query:
             return {self.memory_key: ""}
         # When a namespace is configured we must filter retrieved hits to
