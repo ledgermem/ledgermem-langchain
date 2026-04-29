@@ -3,14 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ledgermem-langchain"
+name = "getmnemo-langchain"
 version = "0.1.0"
-description = "LangChain adapter for LedgerMem — drop-in BaseMemory and Retriever backed by the LedgerMem SDK."
+description = "LangChain adapter for Mnemo — drop-in BaseMemory and Retriever backed by the Mnemo SDK."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "LedgerMem", email = "founders@proofly.dev" }]
-keywords = ["ledgermem", "langchain", "memory", "rag", "retriever", "llm"]
+authors = [{ name = "Mnemo", email = "founders@getmnemo.xyz" }]
+keywords = ["getmnemo", "langchain", "memory", "rag", "retriever", "llm"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -21,7 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "ledgermem>=0.1",
+  "getmnemo>=0.1",
   "langchain-core>=0.3,<1.0",
 ]
 
@@ -34,12 +34,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ledgermem/ledgermem-langchain"
-Issues = "https://github.com/ledgermem/ledgermem-langchain/issues"
-Source = "https://github.com/ledgermem/ledgermem-langchain"
+Homepage = "https://github.com/getmnemo/getmnemo-langchain"
+Issues = "https://github.com/getmnemo/getmnemo-langchain/issues"
+Source = "https://github.com/getmnemo/getmnemo-langchain"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/langchain_ledgermem"]
+packages = ["src/langchain_getmnemo"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

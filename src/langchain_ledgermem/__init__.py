@@ -1,7 +1,7 @@
-"""LangChain adapter for LedgerMem."""
+"""LangChain adapter for Mnemo."""
 
-from langchain_ledgermem.memory import LedgerMemMemory
-from langchain_ledgermem.retriever import LedgerMemRetriever
+from langchain_getmnemo.memory import MnemoMemory
+from langchain_getmnemo.retriever import MnemoRetriever
 
-__all__ = ["LedgerMemMemory", "LedgerMemRetriever"]
+__all__ = ["MnemoMemory", "MnemoRetriever"]
 __version__ = "0.1.0"

@@ -1,18 +1,18 @@
-"""LedgerMem-backed conversational memory for LangChain."""
+"""Mnemo-backed conversational memory for LangChain."""
 
 from __future__ import annotations
 
 from typing import Any, Optional
 
 from langchain_core.memory import BaseMemory
-from ledgermem import LedgerMem
+from getmnemo import Mnemo
 from pydantic import Field, PrivateAttr
 
 
-class LedgerMemMemory(BaseMemory):
-    """Conversational memory backed by LedgerMem.
+class MnemoMemory(BaseMemory):
+    """Conversational memory backed by Mnemo.
 
-    On every turn, ``save_context`` writes the user/AI exchange into LedgerMem,
+    On every turn, ``save_context`` writes the user/AI exchange into Mnemo,
     and ``load_memory_variables`` retrieves the top-K relevant prior turns by
     semantic search.
     """
@@ -23,9 +23,9 @@ class LedgerMemMemory(BaseMemory):
     top_k: int = Field(default=5, ge=1, le=50)
     namespace: Optional[str] = None
 
-    _client: LedgerMem = PrivateAttr()
+    _client: Mnemo = PrivateAttr()
 
-    def __init__(self, client: LedgerMem, **kwargs: Any) -> None:
+    def __init__(self, client: Mnemo, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._client = client
 
@@ -84,7 +84,7 @@ class LedgerMemMemory(BaseMemory):
             self._client.add(str(ai_text), metadata=self._format_metadata("assistant"))
 
     def clear(self) -> None:
-        # LedgerMem does not expose a workspace-wide wipe in the SDK; iterate
+        # Mnemo does not expose a workspace-wide wipe in the SDK; iterate
         # and delete. Snapshot ids first — deleting while paginating mutates
         # the underlying collection and either skips rows or loops forever
         # depending on whether the backend uses offset or keyset cursors.

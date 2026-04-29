@@ -1,4 +1,4 @@
-"""LedgerMem-backed retriever for LangChain RAG pipelines."""
+"""Mnemo-backed retriever for LangChain RAG pipelines."""
 
 from __future__ import annotations
 
@@ -7,18 +7,18 @@ from typing import Any
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
-from ledgermem import LedgerMem
+from getmnemo import Mnemo
 from pydantic import Field, PrivateAttr
 
 
-class LedgerMemRetriever(BaseRetriever):
-    """LangChain ``BaseRetriever`` that delegates to ``LedgerMem.search``."""
+class MnemoRetriever(BaseRetriever):
+    """LangChain ``BaseRetriever`` that delegates to ``Mnemo.search``."""
 
     top_k: int = Field(default=5, ge=1, le=100)
 
-    _client: LedgerMem = PrivateAttr()
+    _client: Mnemo = PrivateAttr()
 
-    def __init__(self, client: LedgerMem, **kwargs: Any) -> None:
+    def __init__(self, client: Mnemo, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._client = client
 
