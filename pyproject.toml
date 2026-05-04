@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mnemo-langchain"
+name = "getmnemo-langchain"
 version = "0.1.0"
 description = "LangChain adapter for Mnemo — drop-in BaseMemory and Retriever backed by the Mnemo SDK."
 readme = "README.md"
